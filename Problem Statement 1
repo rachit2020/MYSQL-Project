@@ -1,0 +1,78 @@
+USE newschema;
+CREATE TABLE IF NOT EXISTS Agent_Table (
+    Agent_ID INT(5),
+    Name VARCHAR(20)
+);
+insert into Agent_Table (Agent_ID, Name) values ( '1', 'Vijay'), ( '2', 'Rajesh'), ('3', 'Satish'), ('4', 'Anji');
+describe agent_table;
+
+CREATE TABLE IF NOT EXISTS Case_transaction_details (
+    Case_Id INT(5),
+    Stage VARCHAR(20),
+    Login_Time VARCHAR(50),
+    Logout_Time VARCHAR(50),
+    Agent_ID INT(5),
+    Status VARCHAR(20)
+);
+
+insert into Case_transaction_details (Case_Id,Stage,Login_Time, Logout_Time,Agent_ID,Status) values ('101', 'Maker', '5/11/2019 10:20', '10:30', '2', 'Success'), ('102', 'Maker', '5/11/2019 10:25', '10:35', '1', 'Success'), ('103', 'Maker', '5/11/2019 10:40', '10:50', '2', 'Success'), ('101', 'Checker', '5/11/2019 10:45', '11:00', '3', 'Success'), ('101', 'Approver', '5/11/2019 11:15', '11:30', '2', 'Success'), ('102', 'Checker', '5/11/2019 10:50', '11:00', '1', 'Reject'), ('102', 'Maker', '5/11/2019 11:15', '11:45', '4', 'Reverify'), ('103', 'Checker', '5/11/2019 11:30', '11:40', '2', 'Reject');
+DESCRIBE Case_transaction_details;
+
+SELECT 
+    *
+FROM
+    agent_table;
+
+SELECT 
+    *
+FROM
+    case_transaction_details;
+    
+/*Please Write SQL queries for below
+How many unique cases per day?*/
+
+SELECT 
+    *
+FROM
+    case_transaction_details
+GROUP BY case_id;
+
+/*.Case Id which is rejected by checker but still not reverified?*/
+
+SELECT 
+    *
+FROM
+    case_transaction_details;
+
+SELECT 
+    case_id
+FROM
+    case_transaction_details
+WHERE
+    status = 'Reject'
+        AND status <> 'Reverify';
+        
+/*3.Top Agent names with who processed more applications?*/
+
+select 
+    Name, 
+    counts
+from 
+(
+    select 
+        Name, 
+        counts,
+        rank() over(partition by Name order by counts desc) as rn
+    from 
+    (
+        select 
+            Name, 
+            count(Case_Id) as counts
+        from CASE_TRANSACTION_DETAILS a
+        left join Agent_Table b 
+        on a.Agent_ID = b.Agent_ID
+        group by 
+            Name
+    ) subq
+) sub
+where rn <= 2;
